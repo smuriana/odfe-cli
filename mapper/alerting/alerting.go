@@ -20,9 +20,8 @@ import (
 )
 
 const (
-	featureCountLimit = 5
-	minutesKey        = "m"
-	minutes           = "Minutes"
+	minutesKey = "m"
+	minutes    = "Minutes"
 )
 
 func MapToMonitorOutput(response alerting.MonitorResponse) (*alerting.MonitorOutput, error) {
@@ -33,3 +32,27 @@ func MapToMonitorOutput(response alerting.MonitorResponse) (*alerting.MonitorOut
 		LastUpdatedAt: response.Monitor.LastUpdateTime,
 	}, nil
 }
+
+//MapToCreateMonitor maps to CreateMonitor
+/*func MapToCreateMonitor(request alerting.CreateMonitorRequest) (*alerting.CreateMonitorRequest, error) {
+	var inputs []alerting.Input
+
+	interval, err := mapToInterval(request.Interval)
+	if err != nil {
+		return nil, err
+	}
+	delay, err := mapToInterval(request.Delay)
+	if err != nil {
+		return nil, err
+	}
+	return &ad.CreateDetector{
+		Name:        request.Name,
+		Description: request.Description,
+		TimeField:   request.TimeField,
+		Index:       request.Index,
+		Features:    features,
+		Filter:      request.Filter,
+		Interval:    *interval,
+		Delay:       *delay,
+	}, nil
+}*/

@@ -15,11 +15,13 @@ package alerting
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"odfe-cli/controller/es"
 	entity "odfe-cli/entity/alerting"
 	"odfe-cli/gateway/alerting"
+	"odfe-cli/mapper"
 	alertingmapper "odfe-cli/mapper/alerting"
 )
 
@@ -28,6 +30,7 @@ import (
 //Controller is an interface for the Alerting plugin controllers
 type Controller interface {
 	GetMonitor(context.Context, string) (*entity.MonitorOutput, error)
+	CreateMonitors(context.Context, entity.CreateMonitorRequest) (*string, error)
 }
 
 type controller struct {
@@ -45,6 +48,19 @@ func New(reader io.Reader, esCtrl es.Controller, gateway alerting.Gateway) Contr
 	}
 }
 
+func validateCreateRequest(r entity.CreateMonitorRequest) error {
+	if len(r.Type) < 1 {
+		return fmt.Errorf("type field cannot be empty")
+	}
+	if len(r.Name) < 1 {
+		return fmt.Errorf("name field cannot be empty")
+	}
+	if len(r.Inputs) < 1 {
+		return fmt.Errorf("inputs cannot be empty")
+	}
+	return nil
+}
+
 //GetMonitor fetch monitor based on MonitorID
 func (c controller) GetMonitor(ctx context.Context, ID string) (*entity.MonitorOutput, error) {
 	if len(ID) < 1 {
@@ -60,4 +76,35 @@ func (c controller) GetMonitor(ctx context.Context, ID string) (*entity.MonitorO
 		return nil, err
 	}
 	return alertingmapper.MapToMonitorOutput(data)
+}
+
+func processEntityError(err error) error {
+	var c entity.CreateError
+	data := fmt.Sprintf("%v", err)
+	responseErr := json.Unmarshal([]byte(data), &c)
+	if responseErr != nil {
+		return err
+	}
+	if len(c.Error.Reason) > 0 {
+		return errors.New(c.Error.Reason)
+	}
+	return err
+}
+
+//CreateMonitor creates monitor based on user request
+func (c controller) CreateMonitors(ctx context.Context, r entity.CreateMonitorRequest) (*string, error) {
+
+	if err := validateCreateRequest(r); err != nil {
+		return nil, err
+	}
+	response, err := c.gateway.CreateMonitor(ctx, r)
+	if err != nil {
+		return nil, processEntityError(err)
+	}
+	var data map[string]interface{}
+	_ = json.Unmarshal(response, &data)
+
+	monitorID := fmt.Sprintf("%s", data["_id"])
+
+	return mapper.StringToStringPtr(monitorID), nil
 }

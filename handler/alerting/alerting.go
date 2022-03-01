@@ -14,8 +14,12 @@ package alerting
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"odfe-cli/controller/alerting"
 	entity "odfe-cli/entity/alerting"
+	"os"
 )
 
 //Handler is facalertine for controller
@@ -44,4 +48,161 @@ func (h *Handler) GetMonitorByID(ID string) ([]*entity.MonitorOutput, error) {
 	}
 	output := []*entity.MonitorOutput{monitor}
 	return output, nil
+}
+
+//CreateMonitor creates monitor based on file configurations
+func CreateMonitor(h *Handler, fileName string) error {
+	return h.CreateMonitor(fileName)
+}
+
+/*CreateMonitor Creates a monitor.
+It calls http request: POST _opendistro/_alerting/monitors
+Sample Input:
+{
+  "type": "monitor",
+  "name": "test-monitor",
+  "enabled": true,
+  "schedule": {
+    "period": {
+      "interval": 1,
+      "unit": "MINUTES"
+    }
+  },
+  "inputs": [{
+    "search": {
+      "indices": ["movies"],
+      "query": {
+        "size": 0,
+        "aggregations": {},
+        "query": {
+          "bool": {
+            "filter": {
+              "range": {
+                "@timestamp": {
+                  "gte": "||-1h",
+                  "lte": "",
+                  "format": "epoch_millis"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }],
+  "triggers": [{
+    "name": "test-trigger",
+    "severity": "1",
+    "condition": {
+      "script": {
+        "source": "ctx.results[0].hits.total.value > 0",
+        "lang": "painless"
+      }
+    },
+    "actions": [{
+      "name": "test-action",
+      "destination_id": "ld7912sBlQ5JUWWFThoW",
+      "message_template": {
+        "source": "This is my message body."
+      },
+      "throttle_enabled": true,
+      "throttle": {
+        "value": 27,
+        "unit": "MINUTES"
+      },
+      "subject_template": {
+        "source": "TheSubject"
+      }
+    }]
+  }]
+}*/
+
+//GenerateMonitor generate sample monitor to provide skeleton for users
+func GenerateMonitor() ([]byte, error) {
+
+	return json.MarshalIndent(entity.CreateMonitorRequest{
+		Type:    "monitor",
+		Name:    "Monitor Name",
+		Enabled: true,
+		Schedule: entity.Schedule{
+			Period: entity.Period{
+				Interval: 1,
+				Unit:     "MINUTES",
+			},
+		},
+		Inputs: []entity.Input{
+			{
+				Search: entity.Search{
+					Indices: []string{"[\"movies\"]"},
+					Query: entity.SearchQuery{
+						Match: entity.Match{
+							Name: "",
+						},
+					},
+				},
+			},
+		},
+		Triggers: []entity.TriggerRequest{
+			{
+				Name:     "",
+				Severity: "",
+				Condition: entity.Script{
+					Source: "ctx.results[0].hits.total.value > 0",
+					Lang:   "painless",
+				},
+				Actions: []entity.ActionRequest{
+					{
+						Name:           "test-action",
+						DestionationId: "ld7912sBlQ5JUWWFThoW",
+						MessageTemplate: entity.Script{
+							Source: "This is my message body.",
+						},
+						ThrottleEnabled: true,
+						Throttle: entity.Throttle{
+							Value: 5,
+							Unit:  "MINUTES",
+						},
+						SubjectTemplate: entity.Script{
+							Source: "TheSubject",
+						},
+					},
+				},
+			},
+		},
+	}, "", "  ")
+}
+
+//CreateMonitor creates monitor based on file configurations
+func (h *Handler) CreateMonitor(fileName string) error {
+	if len(fileName) < 1 {
+		return fmt.Errorf("file name cannot be empty")
+	}
+
+	jsonFile, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file %s due to %v", fileName, err)
+	}
+	defer func() {
+		err := jsonFile.Close()
+		if err != nil {
+			fmt.Println("failed to close json:", err)
+		}
+	}()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var request entity.CreateMonitorRequest
+	err = json.Unmarshal(byteValue, &request)
+	if err != nil {
+		return fmt.Errorf("file %s cannot be accepted due to %v", fileName, err)
+	}
+	ctx := context.Background()
+	name, err := h.CreateMonitors(ctx, request)
+	if err != nil {
+		return err
+	}
+	if name != nil {
+		fmt.Printf("Successfully created monitor %v", name)
+		fmt.Println()
+		return nil
+	}
+	return err
 }

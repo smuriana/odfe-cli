@@ -22,7 +22,7 @@ import (
 
 //Period represents time interval
 type Period struct {
-	Duration int32  `json:"interval"`
+	Interval int32  `json:"interval"`
 	Unit     string `json:"unit"`
 }
 
@@ -126,4 +126,35 @@ type MonitorOutput struct {
 	Name          string `json:"name"`
 	Version       string `json:"version"`
 	LastUpdatedAt uint64 `json:"last_update_time"`
+}
+
+type Throttle struct {
+	Value int32  `json:"value"`
+	Unit  string `json:"unit"`
+}
+
+type ActionRequest struct {
+	Name            string   `json:"name"`
+	DestionationId  string   `json:"destination_id"`
+	MessageTemplate Script   `json:"message_template"`
+	ThrottleEnabled bool     `json:"throttle_enabled"`
+	Throttle        Throttle `json:"throttle"`
+	SubjectTemplate Script   `json:"subject_template"`
+}
+
+type TriggerRequest struct {
+	Name      string          `json:"name"`
+	Severity  string          `json:"severity"`
+	Condition Script          `json:"condition"`
+	Actions   []ActionRequest `json:"actions"`
+}
+
+//CreateMonitorRequest represents request for alerting
+type CreateMonitorRequest struct {
+	Type     string           `json:"type"`
+	Name     string           `json:"name"`
+	Enabled  bool             `json:"enabled"`
+	Schedule Schedule         `json:"schedule"`
+	Inputs   []Input          `json:"inputs"`
+	Triggers []TriggerRequest `json:"triggers"`
 }
