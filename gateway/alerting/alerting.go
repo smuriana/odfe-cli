@@ -133,6 +133,7 @@ func (g *gateway) CreateMonitor(ctx context.Context, payload interface{}) ([]byt
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("response, %s", string(response))
 	return response, nil
 }
 

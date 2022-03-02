@@ -119,6 +119,7 @@ Sample Input:
 
 //GenerateMonitor generate sample monitor to provide skeleton for users
 func GenerateMonitor() ([]byte, error) {
+	search := json.RawMessage(`{{"indices": ["movies"],"query": {"size": 0,"aggregations": {},"query": {"bool": {"filter": {"range": {"@timestamp": {"gte": "||-1h","lte": "","format": "epoch_millis"}}}}}}}`)
 
 	return json.MarshalIndent(entity.CreateMonitorRequest{
 		Type:    "monitor",
@@ -132,28 +133,23 @@ func GenerateMonitor() ([]byte, error) {
 		},
 		Inputs: []entity.Input{
 			{
-				Search: entity.Search{
-					Indices: []string{"[\"movies\"]"},
-					Query: entity.SearchQuery{
-						Match: entity.Match{
-							Name: "",
-						},
-					},
-				},
+				Search: json.RawMessage(search),
 			},
 		},
 		Triggers: []entity.TriggerRequest{
 			{
 				Name:     "",
 				Severity: "",
-				Condition: entity.Script{
-					Source: "ctx.results[0].hits.total.value > 0",
-					Lang:   "painless",
+				Condition: entity.Condition{
+					Script: entity.Script{
+						Source: "ctx.results[0].hits.total.value > 0",
+						Lang:   "painless",
+					},
 				},
 				Actions: []entity.ActionRequest{
 					{
-						Name:           "test-action",
-						DestionationId: "ld7912sBlQ5JUWWFThoW",
+						Name:          "test-action",
+						DestinationId: "ld7912sBlQ5JUWWFThoW",
 						MessageTemplate: entity.Script{
 							Source: "This is my message body.",
 						},
@@ -189,16 +185,31 @@ func (h *Handler) CreateMonitor(fileName string) error {
 		}
 	}()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
+	fmt.Println("file read correctly")
 	var request entity.CreateMonitorRequest
 	err = json.Unmarshal(byteValue, &request)
+	jsonF, _ := json.Marshal(request)
+
+	// typecasting byte array to string
+	fmt.Println(string(jsonF))
 	if err != nil {
 		return fmt.Errorf("file %s cannot be accepted due to %v", fileName, err)
 	}
 	ctx := context.Background()
+
+	fmt.Printf("%+v", string(jsonF))
+	fmt.Println()
+	fmt.Printf("lets CreateMonitors, %s", request.Name)
+	fmt.Println()
+
 	name, err := h.CreateMonitors(ctx, request)
 	if err != nil {
+		fmt.Printf("Error %v", err)
+		fmt.Println()
+
 		return err
 	}
+
 	if name != nil {
 		fmt.Printf("Successfully created monitor %v", name)
 		fmt.Println()

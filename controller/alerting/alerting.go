@@ -93,17 +93,22 @@ func processEntityError(err error) error {
 
 //CreateMonitor creates monitor based on user request
 func (c controller) CreateMonitors(ctx context.Context, r entity.CreateMonitorRequest) (*string, error) {
+	fmt.Sprintln("validate request")
 
 	if err := validateCreateRequest(r); err != nil {
 		return nil, err
 	}
+	fmt.Sprintln("validated request")
 	response, err := c.gateway.CreateMonitor(ctx, r)
+
 	if err != nil {
 		return nil, processEntityError(err)
 	}
+	fmt.Sprintln("response received")
+
 	var data map[string]interface{}
 	_ = json.Unmarshal(response, &data)
-
+	fmt.Sprintln("Unmarshal response")
 	monitorID := fmt.Sprintf("%s", data["_id"])
 
 	return mapper.StringToStringPtr(monitorID), nil

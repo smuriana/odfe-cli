@@ -78,34 +78,38 @@ type Search struct {
 }
 
 type Input struct {
-	Search Search `json:"search"`
-}
-type Script struct {
-	Source string `json:"source"`
-	Lang   string `json:"lang"`
+	Search json.RawMessage `json:"search"`
 }
 
+type Script struct {
+	Source string `json:"source"`
+	Lang   string `json:"lang,omitempty"`
+}
+
+type Condition struct {
+	Script Script `json:"script"`
+}
 type Trigger struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Severity  string `json:"severity"`
-	Condition Script `json:"condition"`
+	Id        string    `json:"id"`
+	Name      string    `json:"name"`
+	Severity  string    `json:"severity"`
+	Condition Condition `json:"condition"`
 }
 
 type Action struct {
-	Name            string `json:"name"`
-	DestionationId  string `json:"destination_id"`
-	SubjectTemplate Script `json:"subject_template"`
-	MessageTemplate Script `json:"message_template"`
-	Severity        string `json:"severity"`
-	Condition       Script `json:"condition"`
+	Name            string    `json:"name"`
+	DestionationId  string    `json:"destination_id"`
+	SubjectTemplate Script    `json:"subject_template"`
+	MessageTemplate Script    `json:"message_template"`
+	Severity        string    `json:"severity"`
+	Condition       Condition `json:"condition"`
 }
 
 type Monitor struct {
 	Type           string    `json:"monitor"`
 	Name           string    `json:"name"`
 	Enabled        bool      `json:"enabled"`
-	Enabled_time   string    `json:"enabled_time"`
+	Enabled_time   uint64    `json:"enabled_time"`
 	Schedule       Schedule  `json:"schedule"`
 	Inputs         []Input   `json:"inputs"`
 	Triggers       []Trigger `json:"triggers"`
@@ -116,7 +120,7 @@ type Monitor struct {
 //MonitorResponse represents monitor's setting
 type MonitorResponse struct {
 	ID      string  `json:"_id"`
-	Version string  `json:"_version"`
+	Version int32   `json:"_version"`
 	Monitor Monitor `json:"monitor"`
 }
 
@@ -124,7 +128,7 @@ type MonitorResponse struct {
 type MonitorOutput struct {
 	ID            string
 	Name          string `json:"name"`
-	Version       string `json:"version"`
+	Version       int32  `json:"version"`
 	LastUpdatedAt uint64 `json:"last_update_time"`
 }
 
@@ -135,7 +139,7 @@ type Throttle struct {
 
 type ActionRequest struct {
 	Name            string   `json:"name"`
-	DestionationId  string   `json:"destination_id"`
+	DestinationId   string   `json:"destination_id"`
 	MessageTemplate Script   `json:"message_template"`
 	ThrottleEnabled bool     `json:"throttle_enabled"`
 	Throttle        Throttle `json:"throttle"`
@@ -145,8 +149,8 @@ type ActionRequest struct {
 type TriggerRequest struct {
 	Name      string          `json:"name"`
 	Severity  string          `json:"severity"`
-	Condition Script          `json:"condition"`
-	Actions   []ActionRequest `json:"actions"`
+	Condition Condition       `json:"condition,omitempty"`
+	Actions   []ActionRequest `json:"actions,omitempty"`
 }
 
 //CreateMonitorRequest represents request for alerting
@@ -155,6 +159,6 @@ type CreateMonitorRequest struct {
 	Name     string           `json:"name"`
 	Enabled  bool             `json:"enabled"`
 	Schedule Schedule         `json:"schedule"`
-	Inputs   []Input          `json:"inputs"`
-	Triggers []TriggerRequest `json:"triggers"`
+	Inputs   []Input          `json:"inputs,omitempty"`
+	Triggers []TriggerRequest `json:"triggers,omitempty"`
 }
