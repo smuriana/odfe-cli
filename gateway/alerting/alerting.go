@@ -59,67 +59,6 @@ func (g *gateway) buildCreateURL() (*url.URL, error) {
 	return endpoint, nil
 }
 
-/*CreateMonitor Creates a monitor.
-It calls http request: POST _opendistro/_alerting/monitors
-Sample Input:
-{
-  "type": "monitor",
-  "name": "test-monitor",
-  "enabled": true,
-  "schedule": {
-    "period": {
-      "interval": 1,
-      "unit": "MINUTES"
-    }
-  },
-  "inputs": [{
-    "search": {
-      "indices": ["movies"],
-      "query": {
-        "size": 0,
-        "aggregations": {},
-        "query": {
-          "bool": {
-            "filter": {
-              "range": {
-                "@timestamp": {
-                  "gte": "||-1h",
-                  "lte": "",
-                  "format": "epoch_millis"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }],
-  "triggers": [{
-    "name": "test-trigger",
-    "severity": "1",
-    "condition": {
-      "script": {
-        "source": "ctx.results[0].hits.total.value > 0",
-        "lang": "painless"
-      }
-    },
-    "actions": [{
-      "name": "test-action",
-      "destination_id": "ld7912sBlQ5JUWWFThoW",
-      "message_template": {
-        "source": "This is my message body."
-      },
-      "throttle_enabled": true,
-      "throttle": {
-        "value": 27,
-        "unit": "MINUTES"
-      },
-      "subject_template": {
-        "source": "TheSubject"
-      }
-    }]
-  }]
-}*/
 func (g *gateway) CreateMonitor(ctx context.Context, payload interface{}) ([]byte, error) {
 	createURL, err := g.buildCreateURL()
 	if err != nil {
@@ -133,7 +72,6 @@ func (g *gateway) CreateMonitor(ctx context.Context, payload interface{}) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("response, %s", string(response))
 	return response, nil
 }
 

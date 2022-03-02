@@ -185,33 +185,21 @@ func (h *Handler) CreateMonitor(fileName string) error {
 		}
 	}()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	fmt.Println("file read correctly")
 	var request entity.CreateMonitorRequest
 	err = json.Unmarshal(byteValue, &request)
-	jsonF, _ := json.Marshal(request)
-
 	// typecasting byte array to string
-	fmt.Println(string(jsonF))
 	if err != nil {
 		return fmt.Errorf("file %s cannot be accepted due to %v", fileName, err)
 	}
 	ctx := context.Background()
-
-	fmt.Printf("%+v", string(jsonF))
-	fmt.Println()
-	fmt.Printf("lets CreateMonitors, %s", request.Name)
-	fmt.Println()
-
-	name, err := h.CreateMonitors(ctx, request)
+	monitorId, err := h.CreateMonitors(ctx, request)
 	if err != nil {
 		fmt.Printf("Error %v", err)
 		fmt.Println()
-
 		return err
 	}
-
-	if name != nil {
-		fmt.Printf("Successfully created monitor %v", name)
+	if monitorId != nil {
+		fmt.Printf("Successfully created monitor with ID %v", *monitorId)
 		fmt.Println()
 		return nil
 	}
