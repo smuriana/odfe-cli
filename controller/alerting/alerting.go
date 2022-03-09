@@ -146,11 +146,16 @@ func (c controller) UpdateMonitor(ctx context.Context, input entity.UpdateMonito
 		return fmt.Errorf("monitor Id cannot be empty")
 	}
 	if !force {
-		latestDetector, err := c.GetMonitor(ctx, input.ID)
+		latestMonitor, err := c.GetMonitor(ctx, input.ID)
 		if err != nil {
 			return err
 		}
-		if latestDetector.LastUpdatedAt > input.LastUpdatedAt {
+		fmt.Println()
+		fmt.Printf("latest monitor: %+v", latestMonitor)
+		fmt.Println()
+		fmt.Printf("input: %+v", input)
+		fmt.Println()
+		if latestMonitor.LastUpdatedAt > input.LastUpdatedAt {
 			return fmt.Errorf(
 				"new version for monitor is available. Please fetch latest version and then merge your changes")
 		}
