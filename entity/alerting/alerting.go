@@ -106,7 +106,7 @@ type Action struct {
 }
 
 type Monitor struct {
-	Type           string    `json:"monitor"`
+	Type           string    `json:"type"`
 	Name           string    `json:"name"`
 	Enabled        bool      `json:"enabled"`
 	Enabled_time   uint64    `json:"enabled_time"`
@@ -164,8 +164,8 @@ type CreateMonitorRequest struct {
 }
 
 type UpdateMonitorUserInput struct {
-	ID            string
-	Name          string `json:"name"`
-	Version       int32  `json:"version"`
-	LastUpdatedAt uint64 `json:"last_update_time"`
+	ID            string  `json:"_id"`
+	Version       int32   `json:"_version"`
+	Monitor       Monitor `json:"monitor"`
+	LastUpdatedAt uint64  `json:"last_update_time"`
 }

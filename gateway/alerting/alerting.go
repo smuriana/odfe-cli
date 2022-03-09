@@ -133,6 +133,7 @@ func (g *gateway) UpdateMonitor(ctx context.Context, ID string, payload interfac
 	if err != nil {
 		return nil, err
 	}
+
 	response, err := g.Call(monitorRequest, http.StatusOK)
 	if err != nil {
 		return nil, err

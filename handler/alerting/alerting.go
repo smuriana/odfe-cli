@@ -205,3 +205,39 @@ func (h *Handler) CreateMonitor(fileName string) error {
 	}
 	return err
 }
+
+//UpdateMonitor updates monitor based on file configurations
+func (h *Handler) UpdateMonitor(fileName string, force bool) error {
+	if len(fileName) < 1 {
+		return fmt.Errorf("file name cannot be empty")
+	}
+
+	jsonFile, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file %s due to %v", fileName, err)
+	}
+	defer func() {
+		err := jsonFile.Close()
+		if err != nil {
+			fmt.Println("failed close json file due to ", err)
+		}
+	}()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var request entity.UpdateMonitorUserInput
+	err = json.Unmarshal(byteValue, &request)
+	if err != nil {
+		return fmt.Errorf("file %s cannot be accepted due to %v", fileName, err)
+	}
+	ctx := context.Background()
+	err = h.Controller.UpdateMonitor(ctx, request, force)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Successfully updated monitor.")
+	return nil
+}
+
+// UpdateMonitor updates monitor based on file configurations
+func UpdateMonitor(h *Handler, fileName string, force bool) error {
+	return h.UpdateMonitor(fileName, force)
+}

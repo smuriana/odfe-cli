@@ -34,7 +34,7 @@ type Controller interface {
 	GetMonitor(context.Context, string) (*entity.MonitorOutput, error)
 	CreateMonitors(context.Context, entity.CreateMonitorRequest) (*string, error)
 	DeleteMonitor(context.Context, string, bool) error
-	UpdateMonitor(context.Context, entity.UpdateMonitorUserInput, bool) ([]byte, error)
+	UpdateMonitor(context.Context, entity.UpdateMonitorUserInput, bool) error
 }
 
 type controller struct {
@@ -141,27 +141,27 @@ func (c controller) DeleteMonitor(ctx context.Context, id string, force bool) er
 
 //UpdateMonitor updates monitor based on MonitorID, if force is enabled, it overrides without checking whether
 // user downloaded latest version before updating it, if enable is true, monitor will be enabled after update
-func (c controller) UpdateMonitor(ctx context.Context, input entity.UpdateMonitorUserInput, force bool) ([]byte, error) {
+func (c controller) UpdateMonitor(ctx context.Context, input entity.UpdateMonitorUserInput, force bool) error {
 	if len(input.ID) < 1 {
-		return nil, fmt.Errorf("monitor Id cannot be empty")
+		return fmt.Errorf("monitor Id cannot be empty")
 	}
 	if !force {
 		latestDetector, err := c.GetMonitor(ctx, input.ID)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if latestDetector.LastUpdatedAt > input.LastUpdatedAt {
-			return nil, fmt.Errorf(
+			return fmt.Errorf(
 				"new version for monitor is available. Please fetch latest version and then merge your changes")
 		}
 	}
 	payload, err := alertingmapper.MapToUpdateMonitor(input)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	monitorUpdated, err := c.gateway.UpdateMonitor(ctx, input.ID, payload)
+	_, err = c.gateway.UpdateMonitor(ctx, input.ID, payload)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return monitorUpdated, nil
+	return nil
 }
