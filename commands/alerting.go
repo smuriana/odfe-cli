@@ -30,8 +30,10 @@ import (
 const (
 	alertingCommandName           = "alerting"
 	alertingMonitorCommandName    = "monitor"
-	alertingMonitorGetFlagName    = "get"
 	alertingMonitorCreateFlagName = "create"
+	alertingMonitorGetFlagName    = "get"
+	alertingMonitorUpdateFlagName = "update"
+	alertingMonitorDeleteFlagName = "delete"
 )
 
 //alertingCommand is base command for Alerting plugin.

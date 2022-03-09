@@ -162,3 +162,10 @@ type CreateMonitorRequest struct {
 	Inputs   []Input          `json:"inputs,omitempty"`
 	Triggers []TriggerRequest `json:"triggers,omitempty"`
 }
+
+type UpdateMonitorUserInput struct {
+	ID            string
+	Name          string `json:"name"`
+	Version       int32  `json:"version"`
+	LastUpdatedAt uint64 `json:"last_update_time"`
+}

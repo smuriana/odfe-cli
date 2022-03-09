@@ -23,6 +23,8 @@ import (
 	"odfe-cli/gateway/alerting"
 	"odfe-cli/mapper"
 	alertingmapper "odfe-cli/mapper/alerting"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 //go:generate go run -mod=mod github.com/golang/mock/mockgen -destination=mocks/mock_alerting.go -package=mocks . Controller
@@ -31,6 +33,8 @@ import (
 type Controller interface {
 	GetMonitor(context.Context, string) (*entity.MonitorOutput, error)
 	CreateMonitors(context.Context, entity.CreateMonitorRequest) (*string, error)
+	DeleteMonitor(context.Context, string, bool) error
+	UpdateMonitor(context.Context, entity.UpdateMonitorUserInput, bool) ([]byte, error)
 }
 
 type controller struct {
@@ -78,6 +82,16 @@ func (c controller) GetMonitor(ctx context.Context, ID string) (*entity.MonitorO
 	return alertingmapper.MapToMonitorOutput(data)
 }
 
+//createProgressBar creates progress bar with suffix as counter and number of action completed, prefix as percentage
+func createProgressBar(total int) *pb.ProgressBar {
+	template := `{{string . "prefix"}}{{percent . }} {{bar . "[" "=" ">" "_" "]" }} {{counters . }}{{string . "suffix"}}`
+	bar := pb.New(total)
+	bar.SetTemplateString(template)
+	bar.SetMaxWidth(65)
+	bar.Start()
+	return bar
+}
+
 func processEntityError(err error) error {
 	var c entity.CreateError
 	data := fmt.Sprintf("%v", err)
@@ -107,4 +121,47 @@ func (c controller) CreateMonitors(ctx context.Context, r entity.CreateMonitorRe
 	monitorID := fmt.Sprintf("%s", data["_id"])
 
 	return mapper.StringToStringPtr(monitorID), nil
+}
+
+//DeleteMonitor deletes monitor based on Id.
+func (c controller) DeleteMonitor(ctx context.Context, id string, force bool) error {
+	monitorOutput, err := c.GetMonitor(ctx, id)
+	if err != nil {
+		return err
+	}
+	if monitorOutput == nil {
+		return nil
+	}
+	_, err = c.gateway.DeleteMonitor(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//UpdateMonitor updates monitor based on MonitorID, if force is enabled, it overrides without checking whether
+// user downloaded latest version before updating it, if enable is true, monitor will be enabled after update
+func (c controller) UpdateMonitor(ctx context.Context, input entity.UpdateMonitorUserInput, force bool) ([]byte, error) {
+	if len(input.ID) < 1 {
+		return nil, fmt.Errorf("monitor Id cannot be empty")
+	}
+	if !force {
+		latestDetector, err := c.GetMonitor(ctx, input.ID)
+		if err != nil {
+			return nil, err
+		}
+		if latestDetector.LastUpdatedAt > input.LastUpdatedAt {
+			return nil, fmt.Errorf(
+				"new version for monitor is available. Please fetch latest version and then merge your changes")
+		}
+	}
+	payload, err := alertingmapper.MapToUpdateMonitor(input)
+	if err != nil {
+		return nil, err
+	}
+	monitorUpdated, err := c.gateway.UpdateMonitor(ctx, input.ID, payload)
+	if err != nil {
+		return nil, err
+	}
+	return monitorUpdated, nil
 }

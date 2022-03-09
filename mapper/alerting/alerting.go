@@ -33,6 +33,15 @@ func MapToMonitorOutput(response alerting.MonitorResponse) (*alerting.MonitorOut
 	}, nil
 }
 
+func MapToUpdateMonitor(monitor alerting.UpdateMonitorUserInput) (*alerting.UpdateMonitorUserInput, error) {
+	return &alerting.UpdateMonitorUserInput{
+		ID:            monitor.ID,
+		Name:          monitor.Name,
+		Version:       monitor.Version,
+		LastUpdatedAt: monitor.LastUpdatedAt,
+	}, nil
+}
+
 //MapToCreateMonitor maps to CreateMonitor
 /*func MapToCreateMonitor(request alerting.CreateMonitorRequest) (*alerting.CreateMonitorRequest, error) {
 	var inputs []alerting.Input

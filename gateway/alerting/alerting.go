@@ -33,12 +33,14 @@ const (
 	updateURLTemplate = baseURL + "/%s"
 )
 
-//go:generate go run -mod=mod github.com/golang/mock/mockgen  -destination=mocks/mock_alerting.go -package=mocks . Gateway
+//go:generate go run -mod=mod github.com/golang/mock/mockgen -destination=mocks/mock_alerting.go -package=mocks . Gateway
 
 // Gateway interface to AD Plugin
 type Gateway interface {
 	CreateMonitor(context.Context, interface{}) ([]byte, error)
 	GetMonitor(context.Context, string) ([]byte, error)
+	UpdateMonitor(context.Context, string, interface{}) ([]byte, error)
+	DeleteMonitor(context.Context, string) ([]byte, error)
 }
 
 type gateway struct {
@@ -64,11 +66,11 @@ func (g *gateway) CreateMonitor(ctx context.Context, payload interface{}) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	detectorRequest, err := g.BuildRequest(ctx, http.MethodPost, payload, createURL.String(), gw.GetDefaultHeaders())
+	monitorRequest, err := g.BuildRequest(ctx, http.MethodPost, payload, createURL.String(), gw.GetDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
-	response, err := g.Call(detectorRequest, http.StatusCreated)
+	response, err := g.Call(monitorRequest, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +86,25 @@ func (g *gateway) buildGetURL(ID string) (*url.URL, error) {
 	return endpoint, nil
 }
 
-// GetMonitor Returns all information about a detector based on the monitor_id.
+func (g *gateway) buildUpdateURL(ID string) (*url.URL, error) {
+	endpoint, err := gw.GetValidEndpoint(g.Profile)
+	if err != nil {
+		return nil, err
+	}
+	endpoint.Path = fmt.Sprintf(updateURLTemplate, ID)
+	return endpoint, nil
+}
+
+func (g *gateway) buildDeleteURL(ID string) (*url.URL, error) {
+	endpoint, err := gw.GetValidEndpoint(g.Profile)
+	if err != nil {
+		return nil, err
+	}
+	endpoint.Path = fmt.Sprintf(deleteURLTemplate, ID)
+	return endpoint, nil
+}
+
+// GetMonitor Returns all information about a monitor based on the monitor_id.
 // It calls http request: GET _opendistro/_alerting/monitors/<monitorId>
 func (g *gateway) GetMonitor(ctx context.Context, ID string) ([]byte, error) {
 	getURL, err := g.buildGetURL(ID)
@@ -92,6 +112,42 @@ func (g *gateway) GetMonitor(ctx context.Context, ID string) ([]byte, error) {
 		return nil, err
 	}
 	monitorRequest, err := g.BuildRequest(ctx, http.MethodGet, "", getURL.String(), gw.GetDefaultHeaders())
+	if err != nil {
+		return nil, err
+	}
+	response, err := g.Call(monitorRequest, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// UpdateMonitor Update information of a monitor based on the monitor_id.
+// It calls http request: PUT _opendistro/_alerting/monitors/<monitor_id>
+func (g *gateway) UpdateMonitor(ctx context.Context, ID string, payload interface{}) ([]byte, error) {
+	getURL, err := g.buildUpdateURL(ID)
+	if err != nil {
+		return nil, err
+	}
+	monitorRequest, err := g.BuildRequest(ctx, http.MethodPut, payload, getURL.String(), gw.GetDefaultHeaders())
+	if err != nil {
+		return nil, err
+	}
+	response, err := g.Call(monitorRequest, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// DeleteMonitor Delete a monitor based on the monitor_id.
+// It calls http request: DELETE _opendistro/_alerting/monitors/<monitor_id>
+func (g *gateway) DeleteMonitor(ctx context.Context, ID string) ([]byte, error) {
+	getURL, err := g.buildDeleteURL(ID)
+	if err != nil {
+		return nil, err
+	}
+	monitorRequest, err := g.BuildRequest(ctx, http.MethodDelete, "", getURL.String(), gw.GetDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
