@@ -1,23 +1,127 @@
 {
-  "name": "test-detector-ecommerce0",
-  "description": "Test detector",
-  "time_field": "utc_time",
-  "index": ["kibana_sample_data_ecommerce*"],
-  "features": [{
-    "aggregation_type": ["sum", "average"],
-    "enabled": true,
-    "field":["total_quantity"]
-  }],
-  "filter": {
-    "bool": {
-      "filter": {
-        "term": {
-          "currency": "EUR"
+"type" : "monitor",
+"schema_version" : 3,
+"name" : "Login attempts - BMC-DEV",
+"enabled" : true,
+"enabled_time" : 1602748884477,
+"schedule" : {
+  "period" : {
+    "interval" : 1,
+    "unit" : "HOURS"
+  }
+},
+"inputs" : [
+  {
+    "search" : {
+      "indices" : [
+        "bmc-dev-*"
+      ],
+      "query" : {
+        "query" : {
+          "bool" : {
+            "must" : [
+              {
+                "match" : {
+                  "level" : {
+                    "query" : "ERROR",
+                    "operator" : "OR",
+                    "prefix_length" : 0,
+                    "max_expansions" : 50,
+                    "fuzzy_transpositions" : true,
+                    "lenient" : false,
+                    "zero_terms_query" : "NONE",
+                    "auto_generate_synonyms_phrase_query" : true,
+                    "boost" : 1.0
+                  }
+                }
+              },
+              {
+                "bool" : {
+                  "should" : [
+                    {
+                      "match" : {
+                        "kubernetes.container_name" : {
+                          "query" : "keycloak",
+                          "operator" : "AND",
+                          "prefix_length" : 0,
+                          "max_expansions" : 50,
+                          "fuzzy_transpositions" : true,
+                          "lenient" : false,
+                          "zero_terms_query" : "NONE",
+                          "auto_generate_synonyms_phrase_query" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    },
+                    {
+                      "match" : {
+                        "log" : {
+                          "query" : "username",
+                          "operator" : "AND",
+                          "prefix_length" : 0,
+                          "max_expansions" : 50,
+                          "fuzzy_transpositions" : true,
+                          "lenient" : false,
+                          "zero_terms_query" : "NONE",
+                          "auto_generate_synonyms_phrase_query" : true,
+                          "boost" : 1.0
+                        }
+                      }
+                    }
+                  ],
+                  "adjust_pure_negative" : true,
+                  "boost" : 1.0
+                }
+              }
+            ],
+            "filter" : [
+              {
+                "range" : {
+                  "@timestamp" : {
+                    "from" : "now-1h",
+                    "to" : "now",
+                    "include_lower" : true,
+                    "include_upper" : true,
+                    "boost" : 1.0
+                  }
+                }
+              }
+            ],
+            "adjust_pure_negative" : true,
+            "boost" : 1.0
+          }
         }
-    }}
-  },
-  "interval": "1m",
-  "window_delay": "1m",
-  "start": true,
-  "partition_field": "day_of_week"
+      }
+    }
+  }
+],
+"triggers" : [
+  {
+    "id" : "lo5QK3UBtBQby_Mqxb8D",
+    "name" : "more than 10 attempts ",
+    "severity" : "1",
+    "condition" : {
+      "script" : {
+        "source" : "ctx.results[0].hits.total.value > 10",
+        "lang" : "painless"
+      }
+    },
+    "actions" : [
+      {
+        "id" : "l45QK3UBtBQby_Mqxb8D",
+        "name" : "Logins attempts ",
+        "destination_id" : "9nc64XIBbtZqtuLeDe0S",
+        "message_template" : {
+          "source" : "*{{ctx.results.0.hits.total.value}}* logins attempts in the last hour, more details <https://kibana.phoenixnap.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:bmc-dev,key:kubernetes.labels.app_kubernetes_io%2Fname,negate:!f,params:(query:keycloak),type:phrase,value:keycloak),query:(match:(kubernetes.labels.app_kubernetes_io%2Fname:(query:keycloak,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:bmc-dev,key:level,negate:!f,params:(query:ERROR),type:phrase,value:ERROR),query:(match:(level:(query:ERROR,type:phrase)))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:bmc-dev,key:message,negate:!f,params:(query:'*username*'),type:phrase,value:'*username*'),query:(match:(message:(query:'*username*',type:phrase))))),index:bmc-dev,interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))|here>",
+          "lang" : "mustache"
+        },
+        "throttle_enabled" : false,
+        "subject_template" : {
+          "source" : "Logins attempts ",
+          "lang" : "mustache"
+        }
+      }
+    ]
+  }
+]
 }
