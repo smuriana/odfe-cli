@@ -26,13 +26,13 @@ const (
 	forceMonitorFlagName     = "force"
 )
 
-//createMonitorCmd creates monitors with configuration from input file, if interactive mode is on,
+//updateMonitorCmd creates monitors with configuration from input file, if interactive mode is on,
 //this command will prompt for confirmation on number of monitors will be created on executions.
 var updateMonitorCmd = &cobra.Command{
 	Use:   updateMonitorCommandName + " json-file-path ..." + " [flags] ",
 	Short: "Update monitors based on JSON files",
 	Long: "Update monitors based on a local JSON file\n" +
-		"To begin, use `odfe-cli get monitor_id to retrive the monitor configuration in JSON format. Save this JSON locally and update it for your use case. Then use `odfe-cli monitor update file-path` to update monitor.",
+		"To begin, use `odfe-cli get monitor_id to retrieve the monitor configuration in JSON format. Save this JSON locally and update it for your use case. Then use `odfe-cli monitor update file-path` to update monitor.",
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		force, _ := cmd.Flags().GetBool(forceMonitorFlagName)

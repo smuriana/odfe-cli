@@ -38,7 +38,7 @@ func MapToUpdateMonitor(monitor alerting.UpdateMonitorUserInput) (*alerting.Upda
 		ID:            monitor.ID,
 		Monitor:       monitor.Monitor,
 		Version:       monitor.Version,
-		LastUpdatedAt: monitor.LastUpdatedAt,
+		LastUpdatedAt: monitor.Monitor.LastUpdateTime,
 	}, nil
 }
 

@@ -155,7 +155,7 @@ func (c controller) UpdateMonitor(ctx context.Context, input entity.UpdateMonito
 		fmt.Println()
 		fmt.Printf("input: %+v", input)
 		fmt.Println()
-		if latestMonitor.LastUpdatedAt > input.LastUpdatedAt {
+		if latestMonitor.LastUpdatedAt > input.Monitor.LastUpdateTime {
 			return fmt.Errorf(
 				"new version for monitor is available. Please fetch latest version and then merge your changes")
 		}
