@@ -94,6 +94,7 @@ type Trigger struct {
 	Name      string    `json:"name"`
 	Severity  string    `json:"severity"`
 	Condition Condition `json:"condition"`
+	Actions   []Action  `json:"actions"`
 }
 
 type Action struct {
@@ -113,7 +114,6 @@ type Monitor struct {
 	Schedule       Schedule  `json:"schedule"`
 	Inputs         []Input   `json:"inputs"`
 	Triggers       []Trigger `json:"triggers"`
-	Actions        []Action  `json:"actions"`
 	LastUpdateTime uint64    `json:"last_update_time"`
 }
 
