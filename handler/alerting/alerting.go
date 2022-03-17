@@ -235,3 +235,18 @@ func (h *Handler) UpdateMonitor(fileName string, force bool) error {
 func UpdateMonitor(h *Handler, fileName string, force bool) error {
 	return h.UpdateMonitor(fileName, force)
 }
+
+func DeleteMonitorByID(h *Handler, monitorId string) error {
+	return h.DeleteMonitorByID(monitorId)
+}
+
+//DeleteMonitorByID delete monitor based on monitorId
+func (h *Handler) DeleteMonitorByID(monitorID string) error {
+
+	ctx := context.Background()
+	err := h.DeleteMonitor(ctx, monitorID)
+	if err != nil {
+		return err
+	}
+	return err
+}

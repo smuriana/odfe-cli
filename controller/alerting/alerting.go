@@ -33,7 +33,7 @@ import (
 type Controller interface {
 	GetMonitor(context.Context, string) (*entity.MonitorOutput, error)
 	CreateMonitors(context.Context, entity.CreateMonitorRequest) (*string, error)
-	DeleteMonitor(context.Context, string, bool) error
+	DeleteMonitor(context.Context, string) error
 	UpdateMonitor(context.Context, entity.UpdateMonitorUserInput, bool) error
 }
 
@@ -124,7 +124,7 @@ func (c controller) CreateMonitors(ctx context.Context, r entity.CreateMonitorRe
 }
 
 //DeleteMonitor deletes monitor based on Id.
-func (c controller) DeleteMonitor(ctx context.Context, id string, force bool) error {
+func (c controller) DeleteMonitor(ctx context.Context, id string) error {
 	monitorOutput, err := c.GetMonitor(ctx, id)
 	if err != nil {
 		return err

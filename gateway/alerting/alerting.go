@@ -148,7 +148,7 @@ func (g *gateway) DeleteMonitor(ctx context.Context, ID string) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
-	monitorRequest, err := g.BuildRequest(ctx, http.MethodDelete, "", getURL.String(), gw.GetDefaultHeaders())
+	monitorRequest, err := g.BuildRequest(ctx, http.MethodDelete, nil, getURL.String(), gw.GetDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
