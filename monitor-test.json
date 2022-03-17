@@ -1,59 +1,90 @@
-
 {
-    "type": "monitor",
-    "name": "test-monitor",
-    "enabled": true,
-    "schedule": {
-      "period": {
-        "interval": 1,
-        "unit": "MINUTES"
+  "_id" : "I1Mwb38B1unmgLJifiB4",
+  "_version" : 1,
+  "_seq_no" : 597,
+  "_primary_term" : 91,
+  "monitor" : {
+    "type" : "monitor",
+    "schema_version" : 3,
+    "name" : "test-CLI2",
+    "user" : {
+      "name" : "sergiom@ccbill.com",
+      "backend_roles" : [
+        "ug_devops_cloudnative",
+        "app_kibana",
+        "app_kibana_admin"
+      ],
+      "roles" : [
+        "alerting_full_access",
+        "all_access",
+        "indexes_full_access",
+        "kibana_user",
+        "manage_snapshots",
+        "own_index",
+        "readall"
+      ],
+      "custom_attribute_names" : [
+        "attr.jwt.roles",
+        "attr.jwt.sub",
+        "attr.jwt.saml_nif",
+        "attr.jwt.nbf",
+        "attr.jwt.exp",
+        "attr.jwt.saml_si"
+      ]
+    },
+    "enabled" : true,
+    "enabled_time" : 1646837923413,
+    "schedule" : {
+      "period" : {
+        "interval" : 1,
+        "unit" : "DAYS"
       }
     },
-    "inputs": [{
-      "search": {
-        "indices": ["movies"],
-        "query": {
-          "size": 0,
-          "aggregations": {},
-          "query": {
-            "bool": {
-              "filter": {
-                "range": {
-                  "@timestamp": {
-                    "gte": "||-1h",
-                    "lte": "",
-                    "format": "epoch_millis"
-                  }
-                }
+    "inputs" : [
+      {
+        "search" : {
+          "indices" : [
+            "bmc-dev-phx-2022-03-03"
+          ],
+          "query" : {
+            "size" : 0,
+            "query" : {
+              "match_all" : {
+                "boost" : 1.0
               }
             }
           }
         }
       }
-    }],
-    "triggers": [{
-      "name": "test-trigger",
-      "severity": "1",
-      "condition": {
-        "script": {
-          "source": "ctx.results[0].hits.total.value > 0",
-          "lang": "painless"
-        }
-      },
-      "actions": [{
-        "name": "test-action",
-        "destination_id": "ld7912sBlQ5JUWWFThoW",
-        "message_template": {
-          "source": "This is my message body."
+    ],
+    "triggers" : [
+      {
+        "id" : "-1Eul38BqcGfG9y3qke2",
+        "name" : "test",
+        "severity" : "1",
+        "condition" : {
+          "script" : {
+            "source" : "ctx.results[0].hits.total.value > 10",
+            "lang" : "painless"
+          }
         },
-        "throttle_enabled": true,
-        "throttle": {
-          "value": 27,
-          "unit": "MINUTES"
-        },
-        "subject_template": {
-          "source": "TheSubject"
-        }
-      }]
-    }]
+        "actions" : [
+          {
+            "id" : "_FEul38BqcGfG9y3qke2",
+            "name" : "test",
+            "destination_id" : "PnT05HIBktE50WDzPyaU",
+            "message_template" : {
+              "source" : "Monitor {{ctx.monitor.name}} ",
+          "lang" : "mustache"
+          },
+          "throttle_enabled" : false,
+          "subject_template" : {
+            "source" : "test",
+            "lang" : "mustache"
+          }
+          }
+        ]
+      }
+    ]
   }
+}

@@ -119,7 +119,6 @@ Sample Input:
 
 //GenerateMonitor generate sample monitor to provide skeleton for users
 func GenerateMonitor() ([]byte, error) {
-	search := json.RawMessage(`{{"indices": ["movies"],"query": {"size": 0,"aggregations": {},"query": {"bool": {"filter": {"range": {"@timestamp": {"gte": "||-1h","lte": "","format": "epoch_millis"}}}}}}}`)
 
 	return json.MarshalIndent(entity.CreateMonitorRequest{
 		Type:    "monitor",
@@ -129,11 +128,6 @@ func GenerateMonitor() ([]byte, error) {
 			Period: entity.Period{
 				Interval: 1,
 				Unit:     "MINUTES",
-			},
-		},
-		Inputs: []entity.Input{
-			{
-				Search: json.RawMessage(search),
 			},
 		},
 		Triggers: []entity.TriggerRequest{
