@@ -20,11 +20,6 @@ import (
 	"odfe-cli/entity"
 )
 
-//Bool type for must query
-type Bool struct {
-	Must []json.RawMessage `json:"must"`
-}
-
 //CreateFailedError structure if create failed
 type CreateFailedError struct {
 	Type   string `json:"type"`
@@ -136,27 +131,21 @@ type CreateMonitorRequest struct {
 }
 
 type UpdateMonitorUserInput struct {
-	ID            string        `json:"_id"`
-	Version       int32         `json:"_version"`
-	Monitor       UpdateMonitor `json:"monitor"`
-	LastUpdatedAt uint64        `json:"last_update_time"`
+	ID          string        `json:"_id"`
+	Version     int           `json:"_version"`
+	SeqNo       int           `json:"_seq_no"`
+	PrimaryTerm int           `json:"_primary_term"`
+	Monitor     UpdateMonitor `json:"monitor"`
 }
 type UpdateMonitor struct {
-	Type          string     `json:"type"`
-	SchemaVersion int        `json:"schema_version"`
-	Name          string     `json:"name"`
-	User          User       `json:"user"`
-	Enabled       bool       `json:"enabled"`
-	EnabledTime   int64      `json:"enabled_time"`
-	Schedule      Schedule   `json:"schedule"`
-	Inputs        []Inputs   `json:"inputs"`
-	Triggers      []Triggers `json:"triggers"`
-}
-type User struct {
-	Name                 string   `json:"name"`
-	BackendRoles         []string `json:"backend_roles"`
-	Roles                []string `json:"roles"`
-	CustomAttributeNames []string `json:"custom_attribute_names"`
+	Type           string      `json:"type"`
+	Name           string      `json:"name"`
+	Enabled        bool        `json:"enabled"`
+	EnabledTime    int64       `json:"enabled_time"`
+	Schedule       Schedule    `json:"schedule"`
+	Inputs         interface{} `json:"inputs"`
+	Triggers       []Triggers  `json:"triggers"`
+	LastUpdateTime int64       `json:"last_update_time"`
 }
 type Period struct {
 	Interval int    `json:"interval"`
@@ -165,25 +154,6 @@ type Period struct {
 type Schedule struct {
 	Period Period `json:"period"`
 }
-type MatchAll struct {
-	Boost float64 `json:"boost"`
-}
-
-type InnerQuery struct {
-	MatchAll MatchAll `json:"match_all"`
-}
-
-type Query struct {
-	Size  int        `json:"size,omitempty"`
-	Query InnerQuery `json:"query,omitempty"`
-}
-type Search struct {
-	Indices []string `json:"indices"`
-	Query   Query    `json:"query"`
-}
-type Inputs struct {
-	Search Search `json:"search"`
-}
 type Script struct {
 	Source string `json:"source"`
 	Lang   string `json:"lang"`
@@ -191,21 +161,19 @@ type Script struct {
 type Condition struct {
 	Script Script `json:"script"`
 }
-type MessageTemplate struct {
-	Source string `json:"source"`
-	Lang   string `json:"lang"`
-}
 type SubjectTemplate struct {
 	Source string `json:"source"`
 	Lang   string `json:"lang"`
 }
+type MessageTemplate struct {
+	Source string `json:"source"`
+	Lang   string `json:"lang"`
+}
 type Actions struct {
-	ID              string          `json:"id"`
 	Name            string          `json:"name"`
 	DestinationID   string          `json:"destination_id"`
-	MessageTemplate MessageTemplate `json:"message_template"`
-	ThrottleEnabled bool            `json:"throttle_enabled"`
 	SubjectTemplate SubjectTemplate `json:"subject_template"`
+	MessageTemplate MessageTemplate `json:"message_template"`
 }
 type Triggers struct {
 	ID        string    `json:"id"`
