@@ -74,14 +74,14 @@ type Action struct {
 }
 
 type Monitor struct {
-	Type           string    `json:"type"`
-	Name           string    `json:"name"`
-	Enabled        bool      `json:"enabled"`
-	Enabled_time   uint64    `json:"enabled_time"`
-	Schedule       Schedule  `json:"schedule"`
-	Inputs         []Input   `json:"inputs"`
-	Triggers       []Trigger `json:"triggers"`
-	LastUpdateTime uint64    `json:"last_update_time"`
+	Type           string      `json:"type"`
+	Name           string      `json:"name"`
+	Enabled        bool        `json:"enabled"`
+	Enabled_time   uint64      `json:"enabled_time"`
+	Schedule       interface{} `json:"schedule"`
+	Inputs         []Input     `json:"inputs"`
+	Triggers       []Trigger   `json:"triggers"`
+	LastUpdateTime uint64      `json:"last_update_time"`
 }
 
 //MonitorResponse represents monitor's setting
@@ -125,7 +125,7 @@ type CreateMonitorRequest struct {
 	Type     string           `json:"type"`
 	Name     string           `json:"name"`
 	Enabled  bool             `json:"enabled"`
-	Schedule Schedule         `json:"schedule"`
+	Schedule interface{}      `json:"schedule"`
 	Inputs   []Input          `json:"inputs,omitempty"`
 	Triggers []TriggerRequest `json:"triggers,omitempty"`
 }
@@ -142,17 +142,10 @@ type UpdateMonitor struct {
 	Name           string      `json:"name"`
 	Enabled        bool        `json:"enabled"`
 	EnabledTime    int64       `json:"enabled_time"`
-	Schedule       Schedule    `json:"schedule"`
+	Schedule       interface{} `json:"schedule"`
 	Inputs         interface{} `json:"inputs"`
 	Triggers       []Triggers  `json:"triggers"`
 	LastUpdateTime int64       `json:"last_update_time"`
-}
-type Period struct {
-	Interval int    `json:"interval"`
-	Unit     string `json:"unit"`
-}
-type Schedule struct {
-	Period Period `json:"period"`
 }
 type Script struct {
 	Source string `json:"source"`

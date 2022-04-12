@@ -121,15 +121,10 @@ Sample Input:
 func GenerateMonitor() ([]byte, error) {
 
 	return json.MarshalIndent(entity.CreateMonitorRequest{
-		Type:    "monitor",
-		Name:    "Monitor Name",
-		Enabled: true,
-		Schedule: entity.Schedule{
-			Period: entity.Period{
-				Interval: 1,
-				Unit:     "MINUTES",
-			},
-		},
+		Type:     "monitor",
+		Name:     "Monitor Name",
+		Enabled:  true,
+		Schedule: "",
 		Triggers: []entity.TriggerRequest{
 			{
 				Name:     "",
